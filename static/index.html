@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kept</title>
+<style>
+  :root {
+    --bg: #e7e1d6;
+    --ink: #1b1916;
+    --muted: #645c52;
+    --card: #f6f2ea;
+    --line: #d5cdc0;
+    --mark: #1f4b3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Avenir Next", "Segoe UI", sans-serif;
+  }
+  main { width: min(1080px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 64px; }
+  header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; }
+  .kicker { letter-spacing: 0.18em; text-transform: uppercase; font-size: 12px; color: var(--mark); font-weight: 700; }
+  h1 { font-family: Georgia, "Iowan Old Style", serif; font-weight: 500; font-size: clamp(42px, 6vw, 64px); line-height: 0.9; margin: 6px 0; }
+  .lede { max-width: 52ch; color: var(--muted); margin: 0; line-height: 1.45; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--muted); background: rgba(255,255,255,.35); }
+  .pill[data-on="1"] { color: var(--mark); border-color: #b7cfc4; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } header { flex-direction: column; align-items: flex-start; } }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  label { display: block; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  input, textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--ink);
+    font: 16px/1.4 Georgia, "Iowan Old Style", serif;
+  }
+  textarea { min-height: 74px; resize: vertical; }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  button {
+    border: 0;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font: 650 14px/1 "Avenir Next", sans-serif;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.45; cursor: wait; }
+  .hint { color: var(--muted); font-size: 12px; }
+  .status { min-height: 1.2em; color: var(--muted); font-size: 14px; margin: 8px 2px 0; }
+  ul.library, .suggestions { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+  li.card, .suggestion {
+    border-top: 1px solid var(--line);
+    padding-top: 8px;
+  }
+  li.card b, .suggestion b { display: block; font-size: 16px; }
+  .meta { color: var(--muted); font-size: 13px; line-height: 1.4; }
+  a { color: var(--mark); }
+  .src { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mark); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="kicker">Kept</div>
+      <h1>Use what<br>you saved.</h1>
+      <p class="lede">Speak why a post matters. Anakin files the page. Later, speak what you’re doing and Kept points at the post, and the repo or link inside it.</p>
+    </div>
+    <div class="pills">
+      <div class="pill" id="pill-wispr">Wispr · desktop</div>
+      <div class="pill" id="pill-anakin">Anakin</div>
+      <div class="pill" id="pill-geniex">GenieX</div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section>
+      <label for="url">The post you would have only saved</label>
+      <input id="url" placeholder="https://… Instagram, LinkedIn, X, a repo, an article" />
+      <label for="why" style="margin-top:10px">Why you’re keeping it</label>
+      <textarea id="why" placeholder="Hold your Wispr Flow key and say why this is worth keeping."></textarea>
+      <div class="row">
+        <button id="keep" type="button">Keep it</button>
+        <span class="hint">Flow key in the why box</span>
+      </div>
+    </section>
+    <section>
+      <label for="need">What you’re doing now</label>
+      <textarea id="need" placeholder="Hold Flow and say the project, the job, or the post you want to make."></textarea>
+      <div class="row">
+        <button id="ask" type="button">What did I keep?</button>
+      </div>
+      <div id="suggestions" class="suggestions"></div>
+    </section>
+  </div>
+  <div class="status" id="status" role="status"></div>
+  <section>
+    <label>Library, one file per post</label>
+    <ul class="library" id="library"></ul>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const status = $("status");
+
+function pill(id, on, text) {
+  const el = $(id);
+  el.dataset.on = on ? "1" : "0";
+  el.textContent = text;
+}
+
+async function health() {
+  try {
+    const data = await (await fetch("/api/health")).json();
+    pill("pill-wispr", true, data.wispr ? "Wispr · API" : "Wispr · desktop");
+    pill("pill-anakin", data.anakin, data.anakin ? "Anakin · key set" : "Anakin · no key");
+    pill("pill-geniex", data.geniex, data.geniex ? "GenieX · on device" : "GenieX · offline");
+  } catch (err) {
+    status.textContent = "Kept isn’t reachable.";
+  }
+}
+
+function renderLibrary(items) {
+  const list = $("library");
+  list.innerHTML = "";
+  if (!items.length) {
+    list.innerHTML = "<li class='meta'>Nothing filed yet. Keep one link.</li>";
+    return;
+  }
+  for (const item of items) {
+    const li = document.createElement("li");
+    li.className = "card";
+    const kind = document.createElement("div");
+    kind.className = "src";
+    kind.textContent = item.source;
+    const title = document.createElement("b");
+    title.textContent = item.title || item.url;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = item.summary || "";
+    const why = document.createElement("div");
+    why.className = "meta";
+    why.textContent = item.why ? "Why: " + item.why : "";
+    const file = document.createElement("div");
+    file.className = "meta";
+    file.textContent = item.md;
+    const link = document.createElement("a");
+    link.href = item.url;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = item.url;
+    li.append(kind, title, meta, why, file, link);
+    if ((item.links || []).length) {
+      const grab = document.createElement("div");
+      grab.className = "meta";
+      grab.textContent = "Inside it: " + item.links.slice(0, 3).join(" · ");
+      li.append(grab);
+    }
+    list.append(li);
+  }
+}
+
+async function refresh() {
+  const data = await (await fetch("/api/items")).json();
+  renderLibrary(data.items || []);
+}
+
+async function post(path, body) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+$("keep").addEventListener("click", async () => {
+  const button = $("keep");
+  button.disabled = true;
+  status.textContent = "Anakin is reading the page into its own file.";
+  try {
+    const data = await post("/api/keep", { url: $("url").value.trim(), why: $("why").value.trim() });
+    status.textContent = data.note || ("Filed " + data.item.md);
+    $("url").value = "";
+    $("why").value = "";
+    await refresh();
+  } catch (err) {
+    status.textContent = err.message;
+  } finally {
+    button.disabled = false;
+    health();
+  }
+});
+
+$("ask").addEventListener("click", async () => {
+  const button = $("ask");
+  button.disabled = true;
+  status.textContent = "Looking through what you kept.";
+  const box = $("suggestions");
+  box.innerHTML = "";
+  try {
+    const data = await post("/api/ask", { need: $("need").value.trim() });
+    status.textContent = data.engine === "geniex"
+      ? "GenieX read the library on device."
+      : "Matched from the files. GenieX will write this once it is running.";
+    for (const hit of data.suggestions || []) {
+      const div = document.createElement("div");
+      div.className = "suggestion";
+      const title = document.createElement("b");
+      title.textContent = hit.title || "Saved post";
+      const because = document.createElement("div");
+      because.className = "meta";
+      because.textContent = hit.because || "";
+      div.append(title, because);
+      if (hit.grab) {
+        const a = document.createElement("a");
+        a.href = hit.grab;
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        a.textContent = hit.grab;
+        div.append(a);
+      }
+      const file = document.createElement("div");
+      file.className = "meta";
+      file.textContent = hit.file || "";
+      div.append(file);
+      box.append(div);
+    }
+  } catch (err) {
+    status.textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+health();
+refresh();
+setInterval(health, 8000);
+</script>
+</body>
+</html>

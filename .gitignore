@@ -1,0 +1,6 @@
+.env
+.venv
+.geniex
+__pycache__/
+*.pyc
+.DS_Store

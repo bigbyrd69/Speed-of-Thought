@@ -1,0 +1,26 @@
+{
+  "id": "github/ac9cdd34aa",
+  "source": "github",
+  "url": "https://github.com/qualcomm/GenieX",
+  "title": "On-device model runtime",
+  "why": "On-device model runtime for a demo that should not send the notes to a cloud model.",
+  "summary": "GenieX allows running large language models and vision language models locally on Qualcomm devices without sending notes to a cloud model. The framework supports NPU, GPU, and CPU for efficient on-device AI processing.",
+  "reuse": "When the user needs to run a demo without cloud integration or data transmission.",
+  "tags": [
+    "on-device-ai",
+    "local-ai",
+    "qualcomm"
+  ],
+  "links": [
+    "https://github.com/qualcomm/GenieX",
+    "https://geniex.aihub.qualcomm.com/en/get-started/what-is-geniex",
+    "https://github.com/qualcomm/GenieX#readme-ov-file",
+    "https://github.com/qualcomm/GenieX#BSD-3-Clause-1-ov-file",
+    "https://github.com/qualcomm/GenieX#coc-ov-file",
+    "https://github.com/qualcomm/GenieX#contributing-ov-file",
+    "https://github.com/qualcomm/GenieX#security-ov-file",
+    "https://github.com/qualcomm/GenieX/activity"
+  ],
+  "kept_at": "2026-10-31 07:28 UTC",
+  "md": "library/github/ac9cdd34aa.md"
+}

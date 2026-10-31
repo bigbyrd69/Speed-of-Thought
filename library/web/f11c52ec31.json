@@ -1,0 +1,26 @@
+{
+  "id": "web/f11c52ec31",
+  "source": "web",
+  "url": "https://anakin.io/docs/documentation/getting-started",
+  "title": "Getting started with AnakinScraper",
+  "why": "How to pull a public page into a project when I only have the link.",
+  "summary": "To pull a public page into a project, you can use the link provided. First, obtain an API key from the Dashboard. Then, choose the appropriate path based on your workflow and programming language. The page provides various options for integration, including CLI, cURL, Python, Node.js, Go, Ruby, PHP, and Java.",
+  "reuse": "When you need to integrate AnakinScraper into your project again, refer back to this page for the steps and options provided.",
+  "tags": [
+    "AnakinScraper",
+    "API key",
+    "integration"
+  ],
+  "links": [
+    "https://anakin.io/dashboard",
+    "https://anakin.io/docs/documentation/getting-started/cli",
+    "https://anakin.io/docs/documentation/getting-started/curl",
+    "https://anakin.io/docs/documentation/getting-started/python",
+    "https://anakin.io/docs/documentation/getting-started/node",
+    "https://anakin.io/docs/documentation/getting-started/go",
+    "https://anakin.io/docs/documentation/getting-started/ruby",
+    "https://anakin.io/docs/documentation/getting-started/php"
+  ],
+  "kept_at": "2026-10-31 07:30 UTC",
+  "md": "library/web/f11c52ec31.md"
+}
