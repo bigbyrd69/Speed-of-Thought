@@ -10,6 +10,58 @@ Saved posts pile up on Instagram, LinkedIn, and X and never get used. Kept turns
 
 Each post is its own pair of files under `library/<source>/`, split by Instagram, LinkedIn, X, GitHub, YouTube, or web.
 
+## Workflow
+
+How a keep and a later recall move through the system. The spoken reason stays on this machine. Anakin only receives the public URL.
+
+```mermaid
+flowchart TD
+  subgraph keepFlow [Keep a post]
+    sayWhy[Wispr Flow types why you kept it]
+    sendUrl[Kept sends the public URL]
+    scrape[Anakin returns the page text and the links on it]
+    card[GenieX writes the title, summary, tags, and when to reuse it]
+    files["library/source/id.md and id.json"]
+    sayWhy --> sendUrl
+    sendUrl --> scrape
+    scrape --> card
+    sayWhy --> card
+    card --> files
+  end
+
+  subgraph askFlow [Recall it later]
+    sayNow[Wispr Flow types what you are doing now]
+    search[Kept matches that against the local files]
+    pick[GenieX picks the file that fits]
+    result[The post, plus a link that was inside it]
+    sayNow --> search
+    files --> search
+    search --> pick
+    pick --> result
+  end
+```
+
+## Use cases
+
+Why you open Kept, and what you do in it.
+
+```mermaid
+flowchart LR
+  you((You))
+  you --> save[A reel, job post, or article is worth keeping]
+  you --> build[You are building a project]
+  you --> apply[You are applying to a job]
+  you --> make[You are making your own content]
+
+  save --> keep[Paste the public link and say why it matters]
+  build --> ask[Say what you are doing now]
+  apply --> ask
+  make --> ask
+  keep --> later[The post is a file you can open again]
+  ask --> later
+  later --> back[Kept points at that post and at a repo or link mentioned in it]
+```
+
 ## Run
 
 ```bash
